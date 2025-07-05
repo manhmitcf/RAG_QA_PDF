@@ -6,11 +6,16 @@ import time
 from src.loader import PDFLoader
 from src.semantic_splitter import SemanticChunker
 from vectordb.chroma import ChromaVectorStore
-from langchain import hub
 import streamlit as st
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -34,23 +39,45 @@ if 'pdf_name' not in st.session_state:
 
 @st.cache_resource
 def load_embeddings():
-    model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
-    return model.return_model()
+    """Load HuggingFace embeddings for vector store"""
+    try:
+        model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
+        return model.return_model()
+    except Exception as e:
+        logger.warning(f"Failed to load Vietnamese model, using backup: {e}")
+        model = ModelEmbedding("all-MiniLM-L6-v2")
+        return model.return_model()
 
 @st.cache_resource
 def load_embedding_model():
     """Load the actual embedding model object for SemanticChunker"""
-    model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
-    return model.model
+    try:
+        model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
+        return model.model
+    except Exception as e:
+        logger.warning(f"Failed to load Vietnamese model, using backup: {e}")
+        model = ModelEmbedding("all-MiniLM-L6-v2")
+        return model.model
 
 @st.cache_resource
 def load_llm():
-    model_name = os.getenv("MODEL_NAME", "lmsys/vicuna-7b-v1.5")
-    llm_model = LLMModel(
-        model_name=model_name,
-        quantization=True
-    )
-    return llm_model.llm
+    """Load language model"""
+    model_name = os.getenv("MODEL_NAME", "microsoft/DialoGPT-medium")
+    try:
+        llm_model = LLMModel(
+            model_name=model_name,
+            quantization=True
+        )
+        return llm_model.llm
+    except Exception as e:
+        logger.error(f"Failed to load LLM {model_name}: {e}")
+        # Fallback to smaller model
+        logger.info("Trying fallback model...")
+        llm_model = LLMModel(
+            model_name="microsoft/DialoGPT-small",
+            quantization=True
+        )
+        return llm_model.llm
 
 
 def process_pdf(uploaded_file):
@@ -68,7 +95,30 @@ def process_pdf(uploaded_file):
     vector_db.add_documents(docs)
     retriever = vector_db.as_retriever()
 
-    prompt = hub.pull("rlm/rag-prompt")
+    # Create prompt template with fallback
+    try:
+        from langchain import hub
+        prompt = hub.pull("rlm/rag-prompt")
+    except Exception as e:
+        logger.warning(f"Failed to pull prompt from hub, using fallback: {e}")
+        template = """Bạn là trợ lý AI thông minh. Sử dụng thông tin từ tài liệu để trả lời câu hỏi một cách chính xác.
+
+Thông tin từ tài liệu:
+{context}
+
+Câu hỏi: {question}
+
+Hướng dẫn:
+- Chỉ sử dụng thông tin từ tài liệu được cung cấp
+- Nếu không tìm thấy thông tin liên quan, hãy nói "Tôi không tìm thấy thông tin liên quan trong tài liệu"
+- Trả lời bằng tiếng Việt
+- Trả lời ngắn gọn và chính xác
+
+Trả lời:"""
+        prompt = PromptTemplate(
+            input_variables=["context", "question"],
+            template=template,
+        )
 
     def format_docs(docs):
         return "\n\n".join([doc.page_content for doc in docs])
@@ -132,10 +182,16 @@ def main():
         if not st.session_state.models_loaded:
             st.warning("⏳ Đang tải models...")
             with st.spinner("Đang tải AI models..."):
-                st.session_state.embeddings = load_embeddings()
-                st.session_state.embedding_model = load_embedding_model()
-                st.session_state.llm = load_llm()
-                st.session_state.models_loaded = True
+                try:
+                    st.session_state.embeddings = load_embeddings()
+                    st.session_state.embedding_model = load_embedding_model()
+                    st.session_state.llm = load_llm()
+                    st.session_state.models_loaded = True
+                    logger.info("All models loaded successfully!")
+                except Exception as e:
+                    st.error(f"Lỗi tải models: {str(e)}")
+                    logger.error(f"Model loading failed: {e}")
+                    st.stop()
             st.success("✅ Models đã sẵn sàng!")
             st.rerun()
         else:
