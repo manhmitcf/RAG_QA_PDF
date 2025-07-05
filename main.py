@@ -21,6 +21,8 @@ if 'models_loaded' not in st.session_state:
     st.session_state.models_loaded = False
 if 'embeddings' not in st.session_state:
     st.session_state.embeddings = None
+if 'embedding_model' not in st.session_state:
+    st.session_state.embedding_model = None
 if 'llm' not in st.session_state:
     st.session_state.llm = None
 if 'chat_history' not in st.session_state:
@@ -34,6 +36,12 @@ if 'pdf_name' not in st.session_state:
 def load_embeddings():
     model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
     return model.return_model()
+
+@st.cache_resource
+def load_embedding_model():
+    """Load the actual embedding model object for SemanticChunker"""
+    model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
+    return model.model
 
 @st.cache_resource
 def load_llm():
@@ -53,7 +61,7 @@ def process_pdf(uploaded_file):
     loader = PDFLoader(tmp_file_path)
     documents = loader.load()
 
-    semantic_splitter = SemanticChunker(model_embedding = st.session_state.embeddings)
+    semantic_splitter = SemanticChunker(model_embedding = st.session_state.embedding_model)
     docs = semantic_splitter.split_documents(documents)
 
     vector_db = ChromaVectorStore(embedding_function = st.session_state.embeddings)
@@ -63,7 +71,7 @@ def process_pdf(uploaded_file):
     prompt = hub.pull("rlm/rag-prompt")
 
     def format_docs(docs):
-        return "\n\n".join([doc for doc in docs])
+        return "\n\n".join([doc.page_content for doc in docs])
     rag_chain = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
         | prompt
@@ -125,6 +133,7 @@ def main():
             st.warning("⏳ Đang tải models...")
             with st.spinner("Đang tải AI models..."):
                 st.session_state.embeddings = load_embeddings()
+                st.session_state.embedding_model = load_embedding_model()
                 st.session_state.llm = load_llm()
                 st.session_state.models_loaded = True
             st.success("✅ Models đã sẵn sàng!")
