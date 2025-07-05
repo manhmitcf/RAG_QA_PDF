@@ -587,7 +587,7 @@ def main():
         
         **🔧 Ngrok Setup:**
         - Cần NGROK_AUTHTOKEN trong .env
-        - Đăng ký t���i: ngrok.com
+        - Đăng ký token ngrok tại: ngrok.com
         """)
 
     # Main content

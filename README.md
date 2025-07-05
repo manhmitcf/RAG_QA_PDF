@@ -40,7 +40,6 @@ pip install -r requirements.txt
 4. **Cấu hình môi trường**:
 ```bash
 cp .env.example .env
-# Chỉnh sửa file .env nếu cần
 ```
 
 ## 🎯 Cách sử dụng
@@ -61,10 +60,10 @@ streamlit run main.py
 4. **Đặt câu hỏi**: Nhập câu hỏi trong ô chat
 5. **Nhận trả lời**: AI sẽ trả lời dựa trên nội dung PDF
 
-### Demo với Python script
+### Sử dụng với Colab
 
 ```bash
-python demo.py
+python run_ngrok.py
 ```
 
 ## 📁 Cấu trúc dự án
@@ -126,14 +125,6 @@ Bạn có thể thay đổi model trong file `.env`:
 - **RAM**: Đảm bảo đủ RAM cho model
 - **SSD**: Sử dụng SSD để tăng tốc I/O
 
-## 📊 Hiệu suất
-
-| Component | Model | Size | Speed |
-|-----------|-------|------|-------|
-| Embedding | vietnamese-bi-encoder | ~400MB | Fast |
-| LLM | vicuna-7b-v1.5 | ~13GB | Medium |
-| Vector DB | ChromaDB | Variable | Fast |
-
 ## 🤝 Đóng góp
 
 1. Fork repository
@@ -142,28 +133,7 @@ Bạn có thể thay đổi model trong file `.env`:
 4. Push to branch
 5. Create Pull Request
 
-## 📄 License
 
-MIT License - xem file LICENSE để biết thêm chi tiết.
-
-## 🆘 Hỗ trợ
-
-Nếu gặp vấn đề, hãy:
-1. Kiểm tra phần Troubleshooting
-2. Tạo issue trên GitHub
-3. Liên hệ team phát triển
-
-## 🔄 Cập nhật
-
-Để cập nhật lên phiên bản mới:
-
-```bash
-git pull origin main
-pip install -r requirements.txt --upgrade
-```
-
----
-
-**Phát triển bởi**: RAG Team  
+**Phát triển bởi**: Manhblue
 **Phiên bản**: 1.0.0  
 **Cập nhật**: 2024
