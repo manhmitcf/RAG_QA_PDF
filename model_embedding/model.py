@@ -6,6 +6,9 @@ class ModelEmbedding:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         model_kwargs = {'device': device}
         self.model = HuggingFaceEmbeddings(model_name=model_name, model_kwargs=model_kwargs)
+    
+    def return_model(self):
+        return self.model
 
     def get_embedding_context(self, text):
         return self.model.embed_documents(text)
@@ -15,5 +18,5 @@ class ModelEmbedding:
     
 
 if __name__ == "__main__":
-    model = ModelEmbedding("sentence-transformers/all-MiniLM-L6-v2")
+    model = ModelEmbedding("bkai-foundation-models/vietnamese-bi-encoder")
     print(model.get_embedding_context("Hello world"))

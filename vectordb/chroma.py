@@ -1,5 +1,5 @@
 from langchain_chroma import Chroma 
-
+from langchain_core.vectorstores import VectorStoreRetriever
 class ChromaVectorStore(Chroma):
     def __init__(
         self,
@@ -23,7 +23,8 @@ class ChromaVectorStore(Chroma):
 
     def query_with_score(self, query_text: str, k: int = 3):
         return self.similarity_search_with_score(query_text, k=k)
-
+    def as_retriever(self, search_kwargs: dict = None):
+        return VectorStoreRetriever(vectorstore=self, search_kwargs=search_kwargs or {"k": 3})
     def delete_all(self):
         self._collection.delete(where={})
         self.persist()
