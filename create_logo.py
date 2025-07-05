@@ -54,7 +54,7 @@ def create_simple_logo():
 if __name__ == "__main__":
     try:
         create_simple_logo()
-        print("✅ Logo created successfully!")
+        print("Logo created successfully!")
     except Exception as e:
-        print(f"❌ Error creating logo: {str(e)}")
-        print("💡 You can run the app without logo - it's already fixed in main.py")
+        print(f"Error creating logo: {str(e)}")
+        print("You can run the app without logo - it's already fixed in main.py")
