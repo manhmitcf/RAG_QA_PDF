@@ -1,139 +1,204 @@
-# RAG QA PDF - Hệ thống Hỏi Đáp Thông minh với PDF
+# 🤖 RAG QA PDF
 
-Một ứng dụng RAG (Retrieval-Augmented Generation) cho phép bạn trò chuyện với tài liệu PDF bằng tiếng Việt.
+Hệ thống hỏi đáp thông minh với tài liệu PDF sử dụng RAG (Retrieval-Augmented Generation) và AI
 
-## 🚀 Tính năng
+## ✨ Tính năng chính
 
-- **Upload PDF**: Tải lên và xử lý tài liệu PDF
-- **Trò chuyện thông minh**: Đặt câu hỏi về nội dung tài liệu
-- **Hỗ trợ tiếng Việt**: Tối ưu cho ngôn ngữ tiếng Việt
-- **Giao diện thân thiện**: Sử dụng Streamlit với UI đẹp mắt
-- **Semantic Search**: Tìm kiếm ngữ nghĩa chính xác
+- 📄 **Upload & Xử lý PDF**: Tải lên và phân tích tài liệu PDF tự động
+- 💬 **Chat thông minh**: Đặt câu hỏi và nhận trả lời dựa trên nội dung tài liệu
+- 🇻🇳 **Hỗ trợ tiếng Việt**: Tối ưu cho ngôn ngữ tiếng Việt với Vietnamese-bi-encoder
+- 🌐 **Chạy trên Google Colab**: Sử dụng GPU miễn phí với ngrok tunnel
+- 🔍 **Semantic Search**: Tìm kiếm ngữ nghĩa chính xác với ChromaDB
+- ⚡ **4-bit Quantization**: Tối ưu bộ nhớ với BitsAndBytesConfig
 
-## 📋 Yêu cầu hệ thống
+## 🏗️ Kiến trúc hệ thống
 
-- Python 3.8+
-- CUDA (khuyến nghị cho GPU)
-- RAM: tối thiểu 8GB (khuyến nghị 16GB+)
+```
+📄 PDF Input → 🔄 Document Loader → ✂️ Semantic Splitter → 🗄️ Vector Store → 🔍 Retriever
+                                                                                    ↓
+🤖 LLM Response ← 📝 Prompt Template ← 🔗 RAG Chain ← 🎯 Context + Question ←────┘
+```
 
-## 🛠️ Cài đặt
+## 🚀 Cách sử dụng
 
-1. **Clone repository**:
+### Phương pháp 1: Google Colab (Khuyến nghị)
+
+1. **Lấy Ngrok Authtoken**:
+   ```
+   - Đăng ký tại: https://dashboard.ngrok.com/signup
+   - Copy authtoken từ dashboard
+   ```
+
+2. **Cập nhật file .env**:
+   ```env
+   MODEL_NAME=microsoft/DialoGPT-medium
+   NGROK_AUTHTOKEN=your_authtoken_here
+   ```
+
+3. **Chạy trên Colab**:
+   ```python
+   # Upload project files lên Colab
+   !python run_ngrok.py
+   ```
+
+4. **Sử dụng**:
+   - Click vào public URL từ ngrok
+   - Upload file PDF qua giao diện
+   - Bắt đầu chat với tài liệu!
+
+### Phương pháp 2: Máy local
+
 ```bash
+# Clone repository
 git clone <repository-url>
 cd RAG_QA_PDF
-```
 
-2. **Tạo virtual environment**:
-```bash
-python -m venv rag_qa_pdf
-source rag_qa_pdf/bin/activate  # Linux/Mac
-# hoặc
-rag_qa_pdf\Scripts\activate     # Windows
-```
-
-3. **Cài đặt dependencies**:
-```bash
+# Cài đặt dependencies
 pip install -r requirements.txt
-```
 
-4. **Cấu hình môi trường**:
-```bash
-cp .env.example .env
-```
-
-## 🎯 Cách sử dụng
-
-### Chạy ứng dụng Streamlit
-
-```bash
+# Chạy ứng dụng
 streamlit run main.py
 ```
 
-Ứng dụng sẽ mở tại: `http://localhost:8501`
-
-### Sử dụng giao diện
-
-1. **Tải models**: Đợi hệ thống tải các AI models (lần đầu sẽ mất thời gian)
-2. **Upload PDF**: Chọn file PDF từ sidebar
-3. **Xử lý tài liệu**: Nhấn "Xử lý PDF" để phân tích tài liệu
-4. **Đặt câu hỏi**: Nhập câu hỏi trong ô chat
-5. **Nhận trả lời**: AI sẽ trả lời dựa trên nội dung PDF
-
-### Sử dụng với Colab
-
-```bash
-python run_ngrok.py
-```
-
-## 📁 Cấu trúc dự án
+## 📁 Cấu trúc project
 
 ```
 RAG_QA_PDF/
-├── main.py                 # Ứng dụng Streamlit chính
-├── demo.py                 # Script demo
-├── requirements.txt        # Dependencies
-├── .env                   # Cấu hình môi trường
-├── README.md              # Hướng dẫn này
-├── src/                   # Source code
-│   ├── llm.py            # Language Model
-│   ├── loader.py         # PDF Loader
-│   ├── semantic_splitter.py  # Document Splitter
-│   └── rag_chain.py      # RAG Chain
-├── model_embedding/       # Embedding models
-│   └── model.py
-├── vectordb/             # Vector database
-│   └── chroma.py
-└── data/                 # Thư mục chứa PDF files
+├── main.py                    # Ứng dụng Streamlit chính
+├── run_ngrok.py              # Script chạy trên Google Colab với ngrok
+├── requirements.txt          # Dependencies
+├── .env                      # Cấu hình (MODEL_NAME, NGROK_AUTHTOKEN)
+├── create_logo.py           # Script tạo logo (optional)
+├── data/                    # Thư mục chứa PDF files
+├── src/                     # Source code chính
+│   ├── llm.py              # Language Model với quantization
+│   ├── loader.py           # PDF Document Loader
+│   └── semantic_splitter.py # Semantic Document Splitter
+├── model_embedding/         # Embedding models
+│   └── model.py            # Vietnamese & multilingual embeddings
+└── vectordb/               # Vector database
+    └── chroma.py           # ChromaDB implementation
 ```
 
-## ⚙️ Cấu hình
+## 🔧 Cấu hình chi tiết
+
+### Models được hỗ trợ
+
+**Language Models:**
+- `microsoft/DialoGPT-medium` (khuyến nghị cho Colab - ~1.5GB)
+- `microsoft/DialoGPT-small` (backup model - ~500MB)
+- `lmsys/vicuna-7b-v1.5` (chất lượng cao - ~13GB RAM)
+
+**Embedding Models:**
+- `bkai-foundation-models/vietnamese-bi-encoder` (chính - tiếng Việt)
+- `all-MiniLM-L6-v2` (backup - đa ngôn ngữ)
 
 ### File .env
 
 ```env
-MODEL_NAME=lmsys/vicuna-7b-v1.5
+# Language Model (chọn 1 trong các options trên)
+MODEL_NAME=microsoft/DialoGPT-medium
+
+# Ngrok Authtoken (lấy từ https://dashboard.ngrok.com/)
+NGROK_AUTHTOKEN=your_actual_authtoken_here
 ```
 
-### Thay đổi model
+### Dependencies chính
 
-Bạn có thể thay đổi model trong file `.env`:
-- `lmsys/vicuna-7b-v1.5` (mặc định)
-- `microsoft/DialoGPT-medium`
-- Hoặc bất kỳ model nào tương thích với Hugging Face
+```
+transformers==4.52.4          # Hugging Face Transformers
+bitsandbytes==0.46.0          # 4-bit quantization
+langchain==0.3.25             # RAG framework
+langchain-chroma==0.2.4       # ChromaDB integration
+streamlit                     # Web interface
+pypdf                         # PDF processing
+torch                         # PyTorch backend
+```
 
-## 🔧 Troubleshooting
+## 🎯 Workflow hoạt động
+
+1. **Model Loading**: Tải embedding model và LLM với quantization
+2. **PDF Processing**: Upload → PyPDFLoader → Semantic splitting
+3. **Vector Storage**: Embedding documents → ChromaDB → Retriever
+4. **RAG Chain**: Question → Retrieval → Context + Prompt → LLM → Answer
+5. **Chat Interface**: Streamlit UI với chat history và controls
+
+## ❓ Troubleshooting
 
 ### Lỗi thường gặp
 
-1. **Out of Memory**:
-   - Giảm batch size
-   - Sử dụng quantization
-   - Chuyển sang model nhỏ hơn
+**🔴 Ngrok authtoken không hợp lệ**
+```
+❌ NGROK_AUTHTOKEN not found in .env file!
+```
+**Giải pháp**: Đăng ký ngrok.com và thêm authtoken vào .env
 
-2. **CUDA not available**:
-   - Cài đặt PyTorch với CUDA support
-   - Hoặc chạy trên CPU (chậm hơn)
+**🔴 Out of Memory**
+```
+❌ CUDA out of memory
+```
+**Giải pháp**: 
+- Dùng model nhỏ hơn: `MODEL_NAME=microsoft/DialoGPT-small`
+- Restart Colab runtime
+- Sử dụng High-RAM runtime (Colab Pro)
 
-3. **Model loading failed**:
-   - Kiểm tra kết nối internet
-   - Xóa cache: `~/.cache/huggingface/`
+**🔴 Model loading failed**
+```
+❌ Error loading LLM: Connection timeout
+```
+**Giải pháp**:
+- Kiểm tra kết nối internet
+- Thử model backup tự động
+- Clear Hugging Face cache: `!rm -rf ~/.cache/huggingface/`
+
+**🔴 SemanticChunker error**
+```
+❌ SemanticChunker model_embedding error
+```
+**Giải pháp**: Đã fix trong code với fallback mechanism
 
 ### Performance Tips
 
-- **GPU**: Sử dụng GPU để tăng tốc độ
-- **RAM**: Đảm bảo đủ RAM cho model
-- **SSD**: Sử dụng SSD để tăng tốc I/O
+- 🔋 **GPU Runtime**: Sử dụng GPU T4 trên Colab
+- 📝 **Câu hỏi cụ thể**: Đặt câu hỏi rõ ràng để có kết quả tốt
+- ⏰ **Kiên nhẫn**: Model loading lần đầu mất 5-10 phút
+- 🔄 **Restart**: Restart runtime nếu gặp memory issues
 
-## 🤝 Đóng góp
+## 🌟 Tính năng nâng cao
 
-1. Fork repository
-2. Tạo feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+### Semantic Splitting
+- Sử dụng `SemanticChunker` thay vì split cố định
+- Tự động phát hiện ranh giới ngữ nghĩa
+- Chunk size linh hoạt: 500-1500 tokens
 
+### Smart Fallbacks
+- Tự động chuyển sang backup model nếu main model fail
+- Fallback prompt template nếu hub.pull() fail
+- Error handling toàn diện
 
-**Phát triển bởi**: Manhblue
-**Phiên bản**: 1.0.0  
-**Cập nhật**: 2024
+### Optimizations
+- 4-bit quantization giảm 75% memory usage
+- Streamlit caching cho models
+- Efficient vector retrieval với ChromaDB
+
+## 📞 Hỗ trợ
+
+- 📖 **Setup chi tiết**: Đọc file `run_ngrok.py` comments
+- 🐛 **Bug reports**: Tạo issue với error logs
+- 💬 **Questions**: Liên hệ team development
+- 🔧 **Customization**: Modify models trong .env file
+
+## 📊 Benchmark
+
+| Component | Model | Size | Speed | Accuracy |
+|-----------|-------|------|-------|----------|
+| Embedding | vietnamese-bi-encoder | ~400MB | Fast | High (VN) |
+| LLM | DialoGPT-medium | ~1.5GB | Medium | Good |
+| Vector DB | ChromaDB | Variable | Fast | High |
+| Total RAM | - | ~4-6GB | - | - |
+
+---
+
+**🎉 Chúc bạn sử dụng thành công RAG QA PDF!**
+
+*Developed with ❤️ for Vietnamese AI community*
