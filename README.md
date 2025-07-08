@@ -188,6 +188,11 @@ torch                         # PyTorch backend
 - 💬 **Questions**: Liên hệ team development
 - 🔧 **Customization**: Modify models trong .env file
 
+## 👥 Contributors
+
+- Trinh Nam Thuan
+- Trần Văn Mạnh
+
 ## 📊 Benchmark
 
 | Component | Model | Size | Speed | Accuracy |
